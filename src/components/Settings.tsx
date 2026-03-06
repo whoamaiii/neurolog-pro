@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef, useEffect } from 'react';
+import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useChildProfile } from '../store';
 import {
@@ -16,7 +16,8 @@ import {
     Download,
     Upload,
     Database,
-    RefreshCw
+    RefreshCw,
+    Monitor
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import type { ChildProfile } from '../types';
@@ -28,6 +29,7 @@ import {
 } from '../types';
 import { downloadExport, importData, exportAllData, type ImportResult } from '../utils/exportData';
 import { loadDemoData, clearDemoData } from '../utils/demoData';
+import { StorageManager } from '../utils/storage';
 import { Sparkles } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -90,6 +92,21 @@ export const Settings: React.FC = () => {
 
     const [saved, setSaved] = useState(false);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+    // 3D Background preference
+    const [show3DBackground, setShow3DBackground] = useState(() => {
+        const stored = localStorage.getItem('neurolog_3d_background');
+        if (stored !== null) return stored === 'true';
+        const isMobile = window.matchMedia('(max-width: 768px)').matches;
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        return !isMobile && !prefersReducedMotion;
+    });
+
+    const handleToggle3DBackground = useCallback((enabled: boolean) => {
+        setShow3DBackground(enabled);
+        localStorage.setItem('neurolog_3d_background', String(enabled));
+        window.location.reload();
+    }, []);
 
     // Export/Import state
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -484,6 +501,63 @@ export const Settings: React.FC = () => {
                         <span>{t('settings.stats.goals')}: {dataStats.goals}</span>
                     </div>
                 )}
+
+                {/* Storage Quota Warning */}
+                {(() => {
+                    const usage = StorageManager.getUsageEstimate();
+                    const usedKB = Math.round(usage.usedBytes / 1024);
+                    const quotaKB = Math.round(usage.quotaBytes / 1024);
+                    return (
+                        <div className={`flex items-center gap-3 px-3 py-2 rounded-xl text-xs ${usage.usagePercent >= 80 ? 'bg-amber-500/10 border border-amber-500/20 text-amber-400' : 'text-slate-500'}`}>
+                            <Database size={14} className="flex-shrink-0" />
+                            <span>{t('settings.storage.usage', { used: usedKB, total: quotaKB, percent: usage.usagePercent })}</span>
+                            {usage.usagePercent >= 80 && (
+                                <span className="ml-auto font-bold">{t('settings.storage.warning')}</span>
+                            )}
+                        </div>
+                    );
+                })()}
+            </motion.div>
+
+            {/* Appearance Section */}
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="liquid-glass-card p-5 rounded-3xl space-y-4"
+            >
+                <div className="flex items-center gap-2 mb-2">
+                    <Monitor size={18} className="text-cyan-400" />
+                    <h2 className="text-lg font-bold text-white">{t('settings.appearance.title')}</h2>
+                </div>
+
+                <div className="flex items-center justify-between gap-4">
+                    <div className="flex-1">
+                        <label htmlFor="toggle-3d-bg" className="text-sm text-white font-medium cursor-pointer">
+                            {t('settings.appearance.3dBackground.label')}
+                        </label>
+                        <p className="text-xs text-slate-500 mt-1">
+                            {t('settings.appearance.3dBackground.note')}
+                        </p>
+                    </div>
+                    <button
+                        id="toggle-3d-bg"
+                        role="switch"
+                        aria-checked={show3DBackground}
+                        onClick={() => handleToggle3DBackground(!show3DBackground)}
+                        className={`
+                            relative inline-flex h-7 w-12 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out
+                            ${show3DBackground ? 'bg-primary' : 'bg-white/20'}
+                        `}
+                    >
+                        <span
+                            className={`
+                                pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out
+                                ${show3DBackground ? 'translate-x-5' : 'translate-x-0'}
+                            `}
+                        />
+                    </button>
+                </div>
             </motion.div>
 
             {/* Save Profile Button */}

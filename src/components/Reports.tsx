@@ -2,7 +2,6 @@ import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FileText, Download, Calendar, Check, Loader2, AlertCircle, ArrowLeft } from 'lucide-react';
 import { useLogs, useCrisis, useChildProfile } from '../store';
-import { generatePDF } from '../services/pdfGenerator';
 import { analyzeLogs } from '../services/ai';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
@@ -102,6 +101,7 @@ export const Reports: React.FC = () => {
             }
 
             // 2. Generate PDF
+            const { generatePDF } = await import('../services/pdfGenerator');
             generatePDF(filteredLogs, filteredCrisis, analysis, {
                 title: 'NeuroLogg Pro - Atferdsrapport',
                 startDate,

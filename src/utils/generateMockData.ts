@@ -406,9 +406,9 @@ export const loadMockData = () => {
     const crisisEvents = generateMockCrisisEvents(14);
     const scheduleEntries = generateMockSchedule(7);
 
-    localStorage.setItem('kreativium_logs', JSON.stringify(logs));
-    localStorage.setItem('kreativium_crisis_events', JSON.stringify(crisisEvents));
-    localStorage.setItem('kreativium_schedule_entries', JSON.stringify(scheduleEntries));
+    localStorage.setItem('neurolog_logs', JSON.stringify(logs));
+    localStorage.setItem('neurolog_crisis_events', JSON.stringify(crisisEvents));
+    localStorage.setItem('neurolog_schedule_entries', JSON.stringify(scheduleEntries));
 
     if (import.meta.env.DEV) {
         console.log(`Loaded mock data:
@@ -429,9 +429,9 @@ export const loadMockData = () => {
  * Clear all mock data
  */
 export const clearMockData = () => {
-    localStorage.removeItem('kreativium_logs');
-    localStorage.removeItem('kreativium_crisis_events');
-    localStorage.removeItem('kreativium_schedule_entries');
+    localStorage.removeItem('neurolog_logs');
+    localStorage.removeItem('neurolog_crisis_events');
+    localStorage.removeItem('neurolog_schedule_entries');
     if (import.meta.env.DEV) {
         console.log('Cleared all mock data');
     }

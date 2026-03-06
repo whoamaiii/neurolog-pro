@@ -118,10 +118,10 @@ neurolog-pro/
 ## Data Storage
 
 All data is stored locally in the browser using `localStorage`:
-- `kreativium_logs` - Emotion/arousal log entries
-- `kreativium_crisis_events` - Crisis event records
-- `kreativium_schedule_entries` - Schedule completion data
-- `kreativium_goals` - IEP goal progress
+- `neurolog_logs` - Emotion/arousal log entries
+- `neurolog_crisis_events` - Crisis event records
+- `neurolog_schedule_entries` - Schedule completion data
+- `neurolog_goals` - IEP goal progress
 
 **Privacy:** Data is anonymized before being sent to AI analysis (names, emails, phone numbers removed).
 

@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
-import { Suspense, lazy, useCallback } from 'react';
+import { Suspense, lazy, useCallback, useState } from 'react';
 import { DataProvider, useSettings } from './store';
 import { Layout } from './components/Layout';
 import { ErrorBoundary } from './components/ErrorBoundary';
@@ -90,14 +90,28 @@ const AppContent = () => {
 };
 
 function App() {
+  const [showShader] = useState(() => {
+    // Check for user preference in localStorage
+    const stored = localStorage.getItem('neurolog_3d_background');
+    if (stored !== null) return stored === 'true';
+
+    // Auto-detect: disable on mobile and when reduced motion is preferred
+    const isMobile = window.matchMedia('(max-width: 768px)').matches;
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    return !isMobile && !prefersReducedMotion;
+  });
+
   return (
     <ErrorBoundary>
       <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <DataProvider>
-          {/* Load shader on ALL devices, CSS fallback only while loading */}
-          <Suspense fallback={<CSSBackground />}>
-            <BackgroundShader />
-          </Suspense>
+          {showShader ? (
+            <Suspense fallback={<CSSBackground />}>
+              <BackgroundShader />
+            </Suspense>
+          ) : (
+            <CSSBackground />
+          )}
           <AppContent />
         </DataProvider>
       </BrowserRouter>

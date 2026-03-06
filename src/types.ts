@@ -1,5 +1,5 @@
 // ============================================
-// KREATIVIUM - Complete Data Model for LLM Analysis
+// NeuroLogg Pro - Complete Data Model for LLM Analysis
 // ============================================
 
 // Context types

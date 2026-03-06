@@ -1,6 +1,6 @@
 {
     "home": {
-        "title": "KREATIVIUM",
+        "title": "NEUROLOG PRO",
         "subtitle": "Mestre din energi. Spor ditt sinn.",
         "crisisMode": {
             "title": "Krisemodus",
@@ -135,9 +135,20 @@
             "events": "Hendelser",
             "goals": "Mål"
         },
+        "storage": {
+            "usage": "Lagring: {{used}} KB / {{total}} KB ({{percent}}%)",
+            "warning": "Lite plass!"
+        },
         "save": {
             "button": "Lagre profil",
             "saved": "Lagret!"
+        },
+        "appearance": {
+            "title": "Utseende",
+            "3dBackground": {
+                "label": "Aktiver 3D-animert bakgrunn",
+                "note": "Deaktiveres automatisk på mobile enheter og når redusert bevegelse er foretrukket."
+            }
         },
         "delete": {
             "modal": {

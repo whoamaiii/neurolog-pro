@@ -14,12 +14,12 @@ import type {
 
 // Storage keys - must match store.tsx
 const STORAGE_KEYS = {
-    LOGS: 'kreativium_logs',
-    CRISIS_EVENTS: 'kreativium_crisis_events',
-    SCHEDULE_ENTRIES: 'kreativium_schedule_entries',
-    SCHEDULE_TEMPLATES: 'kreativium_schedule_templates',
-    GOALS: 'kreativium_goals',
-    CHILD_PROFILE: 'kreativium_child_profile',
+    LOGS: 'neurolog_logs',
+    CRISIS_EVENTS: 'neurolog_crisis_events',
+    SCHEDULE_ENTRIES: 'neurolog_schedule_entries',
+    SCHEDULE_TEMPLATES: 'neurolog_schedule_templates',
+    GOALS: 'neurolog_goals',
+    CHILD_PROFILE: 'neurolog_child_profile',
 } as const;
 
 export interface ExportedData {
@@ -113,7 +113,7 @@ export function downloadExport(): void {
     const url = URL.createObjectURL(blob);
 
     const date = new Date().toISOString().split('T')[0];
-    const filename = `kreativium-backup-${date}.json`;
+    const filename = `neurolog-backup-${date}.json`;
 
     const a = document.createElement('a');
     a.href = url;

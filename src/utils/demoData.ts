@@ -574,11 +574,11 @@ export function loadDemoData(): DemoData {
     const data = generateDemoData(90);
 
     // Save to localStorage using the same keys as the app
-    localStorage.setItem('kreativium_logs', JSON.stringify(data.logs));
-    localStorage.setItem('kreativium_crisis_events', JSON.stringify(data.crisisEvents));
-    localStorage.setItem('kreativium_goals', JSON.stringify(data.goals));
-    localStorage.setItem('kreativium_child_profile', JSON.stringify(data.childProfile));
-    localStorage.setItem('kreativium_onboarding_completed', 'true');
+    localStorage.setItem('neurolog_logs', JSON.stringify(data.logs));
+    localStorage.setItem('neurolog_crisis_events', JSON.stringify(data.crisisEvents));
+    localStorage.setItem('neurolog_goals', JSON.stringify(data.goals));
+    localStorage.setItem('neurolog_child_profile', JSON.stringify(data.childProfile));
+    localStorage.setItem('neurolog_onboarding_completed', 'true');
 
     console.log(`[Demo Data] Loaded ${data.logs.length} logs, ${data.crisisEvents.length} crisis events, ${data.goals.length} goals`);
 
@@ -589,14 +589,14 @@ export function loadDemoData(): DemoData {
  * Clears demo data from localStorage
  */
 export function clearDemoData(): void {
-    localStorage.removeItem('kreativium_logs');
-    localStorage.removeItem('kreativium_crisis_events');
-    localStorage.removeItem('kreativium_goals');
-    localStorage.removeItem('kreativium_child_profile');
-    localStorage.removeItem('kreativium_onboarding_completed');
-    localStorage.removeItem('kreativium_schedule_entries');
-    localStorage.removeItem('kreativium_schedule_templates');
-    localStorage.removeItem('kreativium_current_context');
+    localStorage.removeItem('neurolog_logs');
+    localStorage.removeItem('neurolog_crisis_events');
+    localStorage.removeItem('neurolog_goals');
+    localStorage.removeItem('neurolog_child_profile');
+    localStorage.removeItem('neurolog_onboarding_completed');
+    localStorage.removeItem('neurolog_schedule_entries');
+    localStorage.removeItem('neurolog_schedule_templates');
+    localStorage.removeItem('neurolog_current_context');
 
     console.log('[Demo Data] Cleared all demo data');
 }

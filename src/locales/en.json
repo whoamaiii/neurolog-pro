@@ -1,6 +1,6 @@
 {
     "home": {
-        "title": "KREATIVIUM",
+        "title": "NEUROLOG PRO",
         "subtitle": "Master your energy. Track your mind.",
         "crisisMode": {
             "title": "Crisis Mode",
@@ -135,9 +135,20 @@
             "events": "Events",
             "goals": "Goals"
         },
+        "storage": {
+            "usage": "Storage: {{used}} KB / {{total}} KB ({{percent}}%)",
+            "warning": "Running low!"
+        },
         "save": {
             "button": "Save Profile",
             "saved": "Saved!"
+        },
+        "appearance": {
+            "title": "Appearance",
+            "3dBackground": {
+                "label": "Enable 3D animated background",
+                "note": "Disabled automatically on mobile devices and when reduced motion is preferred."
+            }
         },
         "delete": {
             "modal": {

@@ -169,7 +169,7 @@ export const Dashboard: React.FC = () => {
                     >
                         <Sparkles size={20} />
                     </motion.div>
-                    <h1 className="text-slate-900 dark:text-white text-xl font-bold tracking-tight">Kreativium</h1>
+                    <h1 className="text-slate-900 dark:text-white text-xl font-bold tracking-tight">NeuroLogg Pro</h1>
                 </div>
                 <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 bg-white/50 dark:bg-white/5 px-3 py-1.5 rounded-full border border-slate-200 dark:border-white/10 backdrop-blur-sm">
                     <Calendar size={16} />

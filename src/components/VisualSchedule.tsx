@@ -49,7 +49,7 @@ const playTimerEndSound = () => {
 };
 
 // Storage key for today's schedule
-const SCHEDULE_STORAGE_KEY = 'kreativium_daily_schedule';
+const SCHEDULE_STORAGE_KEY = 'neurolog_daily_schedule';
 
 // Default schedule template for demo/fallback
 const DEFAULT_SCHEDULE: Activity[] = [
