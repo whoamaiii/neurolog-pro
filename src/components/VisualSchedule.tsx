@@ -17,7 +17,7 @@ import {
     StickyHeader,
     ConfirmDeleteModal,
     type Activity
-} from './DailyPlanComponents';
+} from './daily-plan';
 
 // Extend window type for webkit prefix
 interface WebkitWindow extends Window {

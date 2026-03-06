@@ -15,7 +15,7 @@ import type { ImportResult } from '../../utils/exportData';
 export interface DataManagementSectionProps {
     dataStats: { logs: number; crisis: number; goals: number };
     handleExport: () => void;
-    fileInputRef: React.RefObject<HTMLInputElement>;
+    fileInputRef: React.RefObject<HTMLInputElement | null>;
     handleFileSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
     showImportModal: boolean;
     setShowImportModal: (show: boolean) => void;
