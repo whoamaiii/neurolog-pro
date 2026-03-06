@@ -6,6 +6,7 @@ import { useSchedule, useAppContext } from '../store';
 import type { ScheduleEntry, ActivityStatus, DailyScheduleTemplate } from '../types';
 import { Settings } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { formatTime } from '../utils/formatting';
 import {
     CurrentActivityCard,
     TimelineItem,
@@ -43,9 +44,8 @@ const playTimerEndSound = () => {
 
         oscillator.start(audioContext.currentTime);
         oscillator.stop(audioContext.currentTime + 0.5);
-    } catch {
-        // Audio not supported, ignore
-    }
+    } catch (e) {
+        if (import.meta.env.DEV) console.warn('Failed to load schedule:', e);    }
 };
 
 // Storage key for today's schedule
@@ -220,12 +220,6 @@ export const VisualSchedule: React.FC = () => {
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [timerActive]);
-
-    const formatTime = (seconds: number) => {
-        const mins = Math.floor(seconds / 60);
-        const secs = seconds % 60;
-        return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-    };
 
     const handleStartTimer = () => {
         setTimerActive(true);

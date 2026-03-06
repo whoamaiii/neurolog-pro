@@ -72,7 +72,7 @@ export const LogEntryForm: React.FC<LogEntryFormProps> = ({ onClose }) => {
                 >
                     <div className="flex items-center justify-between p-6 border-b border-slate-100 dark:border-white/5 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl sticky top-0 z-10">
                         <h2 className="text-slate-900 dark:text-white text-xl font-bold">{t('log.title')}</h2>
-                        <button onClick={onClose} className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-white/10 text-slate-500 dark:text-slate-400 transition-colors">
+                        <button onClick={onClose} aria-label="Lukk" className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-white/10 text-slate-500 dark:text-slate-400 transition-colors">
                             <X size={24} />
                         </button>
                     </div>
@@ -103,6 +103,7 @@ export const LogEntryForm: React.FC<LogEntryFormProps> = ({ onClose }) => {
                                     max="10"
                                     value={arousal}
                                     onChange={(e) => setArousal(Number(e.target.value))}
+                                    aria-label={t('log.arousal.label')}
                                     className="w-full h-2 rounded-full appearance-none cursor-pointer accent-primary"
                                     style={{ background: 'linear-gradient(to right, #4ade80, #facc15, #f87171)' }}
                                 />
@@ -124,6 +125,7 @@ export const LogEntryForm: React.FC<LogEntryFormProps> = ({ onClose }) => {
                                     max="10"
                                     value={valence}
                                     onChange={(e) => setValence(Number(e.target.value))}
+                                    aria-label={t('log.valence.label')}
                                     className="w-full h-2 rounded-full appearance-none cursor-pointer accent-primary"
                                     style={{ background: 'linear-gradient(to right, #f87171, #facc15, #60a5fa)' }}
                                 />
@@ -145,6 +147,7 @@ export const LogEntryForm: React.FC<LogEntryFormProps> = ({ onClose }) => {
                                     max="10"
                                     value={energy}
                                     onChange={(e) => setEnergy(Number(e.target.value))}
+                                    aria-label={t('log.energy.label')}
                                     className="w-full h-2 rounded-full bg-slate-200 dark:bg-slate-700 appearance-none cursor-pointer accent-primary"
                                 />
                                 <div className="flex justify-between text-xs text-slate-500 dark:text-slate-400 font-medium">

@@ -9,3 +9,5 @@ export type { PreparedLog, PreparedCrisis } from './dataPrep';
 export { logsToSummaryStrings, crisisToSummaryStrings, generateStatsSummary } from './tokenOptimization';
 
 export { buildChildProfileContext, buildSystemPrompt, buildUserPrompt } from './prompting';
+
+export { parseAnalysisResponse } from './parsing';

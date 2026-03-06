@@ -580,8 +580,6 @@ export function loadDemoData(): DemoData {
     localStorage.setItem('neurolog_child_profile', JSON.stringify(data.childProfile));
     localStorage.setItem('neurolog_onboarding_completed', 'true');
 
-    console.log(`[Demo Data] Loaded ${data.logs.length} logs, ${data.crisisEvents.length} crisis events, ${data.goals.length} goals`);
-
     return data;
 }
 
@@ -598,5 +596,4 @@ export function clearDemoData(): void {
     localStorage.removeItem('neurolog_schedule_templates');
     localStorage.removeItem('neurolog_current_context');
 
-    console.log('[Demo Data] Cleared all demo data');
 }

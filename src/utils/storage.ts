@@ -11,8 +11,8 @@ export const StorageManager = {
       const raw = localStorage.getItem(key);
       if (raw === null) return null;
       return JSON.parse(raw) as T;
-    } catch {
-      return null;
+    } catch (e) {
+      if (import.meta.env.DEV) console.warn('Failed to parse stored data:', e);      return null;
     }
   },
 
@@ -40,9 +40,8 @@ export const StorageManager = {
           usedBytes += (key.length + (localStorage.getItem(key)?.length ?? 0)) * 2;
         }
       }
-    } catch {
-      // Ignore errors during estimation
-    }
+    } catch (e) {
+      if (import.meta.env.DEV) console.warn('Failed to read from localStorage:', e);    }
 
     return {
       usedBytes,
@@ -63,9 +62,8 @@ export const StorageManager = {
           usedBytes += (key.length + (localStorage.getItem(key)?.length ?? 0)) * 2;
         }
       }
-    } catch {
-      // Ignore errors
-    }
+    } catch (e) {
+      if (import.meta.env.DEV) console.warn('Failed to read from localStorage:', e);    }
 
     return { usedBytes, keyCount };
   },

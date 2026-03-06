@@ -373,6 +373,7 @@
     "navigation": {
         "home": "Home",
         "dashboard": "Dashboard",
+        "log": "New log",
         "analysis": "Analysis"
     }
 }

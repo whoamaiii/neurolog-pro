@@ -47,14 +47,14 @@ export const ProfileStep: React.FC<ProfileStepProps> = ({ onNext }) => {
 
             <div className="w-full space-y-4 pt-4">
                 <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-sm">
-                    <label className="block text-slate-400 text-sm font-medium mb-2 text-left">Barnets Navn</label>
+                    <label htmlFor="child-name-input" className="block text-slate-400 text-sm font-medium mb-2 text-left">Barnets Navn</label>
                     <input
+                        id="child-name-input"
                         type="text"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                         placeholder="F.eks. Lukas"
                         className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-primary/50 text-lg"
-                        autoFocus
                     />
                 </div>
             </div>

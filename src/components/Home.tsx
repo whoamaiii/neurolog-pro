@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from 'react';
+import { useTimeout } from '../hooks/useTimer';
 import { Link } from 'react-router-dom';
 import {
     Brain, Activity, Settings, Clock, Database, Check,
@@ -43,7 +44,6 @@ export const Home: React.FC = () => {
         setMockDataLoaded(true);
         setMockDataCleared(false);
         refreshData();
-        setTimeout(() => setMockDataLoaded(false), 2000);
     }, [refreshData]);
 
     const handleClearMockData = useCallback(() => {
@@ -51,8 +51,10 @@ export const Home: React.FC = () => {
         setMockDataCleared(true);
         setMockDataLoaded(false);
         refreshData();
-        setTimeout(() => setMockDataCleared(false), 2000);
     }, [refreshData]);
+
+    useTimeout(() => setMockDataLoaded(false), mockDataLoaded ? 2000 : null);
+    useTimeout(() => setMockDataCleared(false), mockDataCleared ? 2000 : null);
 
     const toggleLanguage = () => {
         i18n.changeLanguage(i18n.language === 'no' ? 'en' : 'no');
@@ -64,6 +66,7 @@ export const Home: React.FC = () => {
                 onClick={toggleLanguage}
                 className="absolute top-4 right-4 z-50 p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors"
                 title="Switch Language / Bytt språk"
+                aria-label="Switch Language / Bytt språk"
             >
                 <Globe className="text-slate-500 dark:text-slate-400" size={20} />
             </button>

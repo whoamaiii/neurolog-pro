@@ -4,6 +4,7 @@ import { Mic, Square, AlertTriangle, CheckCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { v4 as uuidv4 } from 'uuid';
 import { useCrisis, useAppContext } from '../store';
+import { formatTime } from '../utils/formatting';
 import {
     type CrisisType,
     type CrisisResolution,
@@ -15,6 +16,7 @@ import {
 } from '../types';
 import { TriggerSelector } from './TriggerSelector';
 import { useTranslation } from 'react-i18next';
+import { useTimer } from '../hooks/useTimer';
 
 export const CrisisMode: React.FC = () => {
     const { t } = useTranslation();
@@ -24,7 +26,7 @@ export const CrisisMode: React.FC = () => {
 
     // Timer state
     const [isActive, setIsActive] = useState(true);
-    const [seconds, setSeconds] = useState(0);
+    const [seconds] = useTimer(isActive);
     const [isRecording, setIsRecording] = useState(false);
     const [startTime] = useState(new Date().toISOString());
 
@@ -44,20 +46,6 @@ export const CrisisMode: React.FC = () => {
     const audioChunksRef = React.useRef<Blob[]>([]);
     const [audioUrl, setAudioUrl] = useState<string | null>(null);
 
-    useEffect(() => {
-        let interval: ReturnType<typeof setInterval> | null = null;
-        if (isActive) {
-            interval = setInterval(() => {
-                setSeconds((seconds) => seconds + 1);
-            }, 1000);
-        } else if (!isActive && seconds !== 0) {
-            if (interval) clearInterval(interval);
-        }
-        return () => {
-            if (interval) clearInterval(interval);
-        };
-    }, [isActive, seconds]);
-
     // Cleanup media stream on unmount to prevent memory leaks
     useEffect(() => {
         return () => {
@@ -69,12 +57,6 @@ export const CrisisMode: React.FC = () => {
             }
         };
     }, []);
-
-    const formatTime = (totalSeconds: number) => {
-        const minutes = Math.floor(totalSeconds / 60);
-        const remainingSeconds = totalSeconds % 60;
-        return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
-    };
 
     // Audio Recording Logic
     const blobToBase64 = (blob: Blob): Promise<string> => {
@@ -302,6 +284,7 @@ export const CrisisMode: React.FC = () => {
                                         <Mic size={18} className="text-red-400" />
                                         <span className="text-sm font-bold">{t('crisis.audioSaved')}</span>
                                     </div>
+                                    {/* eslint-disable-next-line jsx-a11y/media-has-caption -- Crisis audio recordings don't have captions */}
                                     <audio controls src={audioUrl} className="w-full h-8" />
                                 </div>
                             )}

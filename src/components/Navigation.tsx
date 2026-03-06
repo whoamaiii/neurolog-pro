@@ -42,7 +42,7 @@ export const Navigation: React.FC = () => {
                     )}
                 </NavLink>
 
-                <NavLink to="/log" className="relative group">
+                <NavLink to="/log" className="relative group" aria-label={t('navigation.log')}>
                     {({ isActive }) => (
                         <div className={`flex flex-col items-center gap-1 transition-colors duration-300 ${isActive ? 'text-primary' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'}`}>
                             <div className={`p-3 rounded-full transition-all duration-300 ${isActive ? 'bg-primary text-white shadow-glow' : 'bg-slate-100 dark:bg-white/10 text-slate-400 dark:text-slate-300 dark:border dark:border-white/10'}`}>

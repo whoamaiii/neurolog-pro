@@ -6,6 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { useGoals, useAppContext } from '../store';
 import { type Goal, type GoalCategory, type GoalStatus, GOAL_CATEGORIES } from '../types';
 import { useTranslation } from 'react-i18next';
+import { THIRTY_DAYS_MS } from '../utils/dateCalc';
 
 export const GoalTracking: React.FC = () => {
     const navigate = useNavigate();
@@ -57,7 +58,7 @@ export const GoalTracking: React.FC = () => {
             targetUnit: newTargetUnit,
             targetDirection: newTargetDirection,
             startDate: new Date().toISOString(),
-            targetDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days
+            targetDate: new Date(Date.now() + THIRTY_DAYS_MS).toISOString(), // 30 days
             currentValue: 0,
             status: 'in_progress' as GoalStatus,
             progressHistory: []
@@ -95,7 +96,7 @@ export const GoalTracking: React.FC = () => {
 
         const now = new Date();
         const startDate = now.toISOString();
-        const targetDate = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString();
+        const targetDate = new Date(now.getTime() + THIRTY_DAYS_MS).toISOString();
 
         return [
             {

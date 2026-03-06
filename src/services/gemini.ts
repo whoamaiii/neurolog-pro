@@ -1,5 +1,8 @@
+/* eslint-disable no-console -- All console calls in this file are DEV-guarded */
 import { GoogleGenAI } from "@google/genai";
-import type { LogEntry, AnalysisResult, CrisisEvent, AnalysisCorrelation, ChildProfile } from '../types';
+import type { LogEntry, AnalysisResult, CrisisEvent, ChildProfile } from '../types';
+import { calculateTotalDays } from '../utils/dateCalc';
+import { parseAnalysisResponse } from './shared/parsing';
 import {
     generateLogsHash,
     getCachedAnalysis,
@@ -27,41 +30,6 @@ interface StreamCallbacks {
 }
 
 // =============================================================================
-// RESPONSE PARSING
-// =============================================================================
-
-const parseAnalysisResponse = (content: string): AnalysisResult => {
-    try {
-        let jsonContent = content;
-        const jsonMatch = content.match(/```(?:json)?\s*([\s\S]*?)```/);
-        if (jsonMatch) jsonContent = jsonMatch[1].trim();
-        const parsed = JSON.parse(jsonContent);
-        return {
-            id: crypto.randomUUID(),
-            generatedAt: new Date().toISOString(),
-            triggerAnalysis: parsed.triggerAnalysis || 'Analyse ikke tilgjengelig',
-            strategyEvaluation: parsed.strategyEvaluation || 'Evaluering ikke tilgjengelig',
-            interoceptionPatterns: parsed.interoceptionPatterns || 'Mønstre ikke identifisert',
-            summary: parsed.summary || 'Oppsummering ikke tilgjengelig',
-            correlations: Array.isArray(parsed.correlations)
-                ? parsed.correlations.map((c: Partial<AnalysisCorrelation>) => ({
-                    factor1: c.factor1 || '', factor2: c.factor2 || '',
-                    relationship: c.relationship || '',
-                    strength: (['weak', 'moderate', 'strong'].includes(c.strength || '') ? c.strength : 'moderate') as 'weak' | 'moderate' | 'strong',
-                    description: c.description || ''
-                }))
-                : undefined,
-            recommendations: Array.isArray(parsed.recommendations)
-                ? parsed.recommendations.filter((r: unknown) => typeof r === 'string')
-                : undefined
-        };
-    } catch (parseError) {
-        if (import.meta.env.DEV) console.error('Failed to parse analysis response:', parseError, content);
-        throw new Error('Invalid response format from Gemini');
-    }
-};
-
-// =============================================================================
 // GEMINI API CALLS
 // =============================================================================
 
@@ -83,8 +51,7 @@ export const analyzeLogsWithGemini = async (
     if (!GEMINI_API_KEY) throw new Error('Gemini API key not configured');
 
     const referenceDate = new Date(logs[logs.length - 1]?.timestamp || new Date());
-    const oldestLog = new Date(logs[0]?.timestamp || new Date());
-    const totalDays = Math.ceil((referenceDate.getTime() - oldestLog.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+    const totalDays = calculateTotalDays(logs);
     const preparedLogs = prepareLogsForAnalysis(logs, referenceDate);
     const preparedCrisis = prepareCrisisEventsForAnalysis(crisisEvents, referenceDate);
     const systemPrompt = buildSystemPrompt(options.childProfile);
@@ -122,8 +89,7 @@ export const analyzeLogsDeepWithGemini = async (
     if (!GEMINI_API_KEY) throw new Error('Gemini API key not configured');
 
     const referenceDate = new Date(logs[logs.length - 1]?.timestamp || new Date());
-    const oldestLog = new Date(logs[0]?.timestamp || new Date());
-    const totalDays = Math.ceil((referenceDate.getTime() - oldestLog.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+    const totalDays = calculateTotalDays(logs);
     const preparedLogs = prepareLogsForAnalysis(logs, referenceDate);
     const preparedCrisis = prepareCrisisEventsForAnalysis(crisisEvents, referenceDate);
     const systemPrompt = buildSystemPrompt(options.childProfile) + '\n\nVIKTIG: Dette er en DYP ANALYSE. Bruk mer tid på å tenke gjennom sammenhenger.\n- Identifiser subtile mønstre som ikke er åpenbare\n- Gi svært spesifikke og handlingsorienterte anbefalinger\n- Analyser interaksjoner mellom ulike faktorer\n- Vurder langsiktige trender og deres implikasjoner';
@@ -162,8 +128,7 @@ export const analyzeLogsStreamingWithGemini = async (
     if (!GEMINI_API_KEY) throw new Error('Gemini API key not configured');
 
     const referenceDate = new Date(logs[logs.length - 1]?.timestamp || new Date());
-    const oldestLog = new Date(logs[0]?.timestamp || new Date());
-    const totalDays = Math.ceil((referenceDate.getTime() - oldestLog.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+    const totalDays = calculateTotalDays(logs);
     const preparedLogs = prepareLogsForAnalysis(logs, referenceDate);
     const preparedCrisis = prepareCrisisEventsForAnalysis(crisisEvents, referenceDate);
     const systemPrompt = buildSystemPrompt(options.childProfile);

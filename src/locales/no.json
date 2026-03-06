@@ -373,6 +373,7 @@
     "navigation": {
         "home": "Hjem",
         "dashboard": "Oversikt",
+        "log": "Ny logg",
         "analysis": "Analyse"
     }
 }

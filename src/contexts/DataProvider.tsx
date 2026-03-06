@@ -54,9 +54,8 @@ function migrateStorageKeys(): void {
                 localStorage.removeItem(oldKey);
             }
         }
-    } catch {
-        // Silently fail - localStorage may be unavailable
-    }
+    } catch (e) {
+        if (import.meta.env.DEV) console.warn('Failed to migrate storage key:', e);    }
 }
 
 // ============================================
@@ -66,8 +65,8 @@ function getStorageItem<T>(key: string, fallback: T): T {
     try {
         const item = localStorage.getItem(key);
         return item ? JSON.parse(item) : fallback;
-    } catch {
-        return fallback;
+    } catch (e) {
+        if (import.meta.env.DEV) console.warn('Failed to parse stored data:', e);        return fallback;
     }
 }
 
@@ -75,8 +74,8 @@ function getStorageString<T extends string>(key: string, fallback: T): T {
     try {
         const item = localStorage.getItem(key);
         return (item as T) ?? fallback;
-    } catch {
-        return fallback;
+    } catch (e) {
+        if (import.meta.env.DEV) console.warn('Failed to read from localStorage:', e);        return fallback;
     }
 }
 

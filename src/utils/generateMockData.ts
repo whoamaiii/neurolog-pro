@@ -1,3 +1,4 @@
+/* eslint-disable no-console -- All console calls in this file are DEV-guarded */
 /**
  * Mock Data Generator for NeuroLogg Pro
  * Generates realistic behavioral data for a neurodivergent child over 2 weeks

@@ -10,12 +10,12 @@ if ('serviceWorker' in navigator) {
   registerSW({
     onNeedRefresh() {
       if (import.meta.env.DEV) {
-        console.log('New content available, refresh to update.')
+        console.log('New content available, refresh to update.') // eslint-disable-line no-console
       }
     },
     onOfflineReady() {
       if (import.meta.env.DEV) {
-        console.log('App ready to work offline.')
+        console.log('App ready to work offline.') // eslint-disable-line no-console
       }
     },
   })

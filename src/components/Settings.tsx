@@ -1,80 +1,24 @@
 import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
+import { useTimeout } from '../hooks/useTimer';
 import { motion } from 'framer-motion';
 import { useChildProfile } from '../store';
 import {
     ArrowLeft,
-    User,
     Save,
     Trash2,
     Check,
-    Brain,
-    MessageSquare,
-    Zap,
-    Heart,
     Info,
-    AlertTriangle,
-    Download,
-    Upload,
-    Database,
-    RefreshCw,
-    Monitor
+    AlertTriangle
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import type { ChildProfile } from '../types';
-import {
-    DIAGNOSIS_OPTIONS,
-    COMMUNICATION_STYLES,
-    SENSORY_TRIGGERS,
-    STRATEGIES
-} from '../types';
 import { downloadExport, importData, exportAllData, type ImportResult } from '../utils/exportData';
 import { loadDemoData, clearDemoData } from '../utils/demoData';
 import { StorageManager } from '../utils/storage';
-import { Sparkles } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-
-// Multi-select chip component
-const ChipSelect: React.FC<{
-    options: readonly { value: string; label: string }[] | string[];
-    selected: string[];
-    onChange: (selected: string[]) => void;
-    maxSelect?: number;
-}> = ({ options, selected, onChange, maxSelect }) => {
-    const toggleOption = (value: string) => {
-        if (selected.includes(value)) {
-            onChange(selected.filter(s => s !== value));
-        } else if (!maxSelect || selected.length < maxSelect) {
-            onChange([...selected, value]);
-        }
-    };
-
-    return (
-        <div className="flex flex-wrap gap-2">
-            {options.map(opt => {
-                const value = typeof opt === 'string' ? opt : opt.value;
-                const label = typeof opt === 'string' ? opt : opt.label;
-                const isSelected = selected.includes(value);
-
-                return (
-                    <button
-                        key={value}
-                        type="button"
-                        onClick={() => toggleOption(value)}
-                        className={`
-                            px-3 py-1.5 rounded-full text-sm font-medium transition-all
-                            ${isSelected
-                                ? 'bg-primary text-white'
-                                : 'bg-white/10 text-slate-300 hover:bg-white/20'
-                            }
-                        `}
-                    >
-                        {label}
-                    </button>
-                );
-            })}
-        </div>
-    );
-};
+import { ProfileSection } from './settings/ProfileSection';
+import { DataManagementSection } from './settings/DataManagementSection';
+import { PreferencesSection } from './settings/PreferencesSection';
 
 export const Settings: React.FC = () => {
     const { t } = useTranslation();
@@ -114,6 +58,8 @@ export const Settings: React.FC = () => {
     const [showImportModal, setShowImportModal] = useState(false);
     const [importMode, setImportMode] = useState<'replace' | 'merge'>('replace');
     const [pendingImportData, setPendingImportData] = useState<string | null>(null);
+    const [importSuccess, setImportSuccess] = useState(false);
+
     // Compute data stats directly (no state needed)
     const dataStats = useMemo(() => {
         const data = exportAllData();
@@ -123,6 +69,8 @@ export const Settings: React.FC = () => {
             goals: data.goals.length
         };
     }, []);
+
+    const storageUsage = useMemo(() => StorageManager.getUsageEstimate(), []);
 
     // Sync form state when childProfile changes externally (e.g., after import)
     const childProfileId = childProfile?.id;
@@ -139,6 +87,9 @@ export const Settings: React.FC = () => {
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [childProfileId]);
+
+    useTimeout(() => setSaved(false), saved ? 2000 : null);
+    useTimeout(() => window.location.reload(), importSuccess ? 1500 : null);
 
     const handleSave = () => {
         const now = new Date().toISOString();
@@ -163,7 +114,6 @@ export const Settings: React.FC = () => {
         }
 
         setSaved(true);
-        setTimeout(() => setSaved(false), 2000);
     };
 
     const handleDelete = () => {
@@ -179,12 +129,10 @@ export const Settings: React.FC = () => {
         setShowDeleteConfirm(false);
     };
 
-    // Export handler
     const handleExport = () => {
         downloadExport();
     };
 
-    // Import file selection handler
     const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
@@ -196,12 +144,9 @@ export const Settings: React.FC = () => {
             setShowImportModal(true);
         };
         reader.readAsText(file);
-
-        // Reset input so same file can be selected again
         e.target.value = '';
     };
 
-    // Confirm import handler
     const handleConfirmImport = () => {
         if (!pendingImportData) return;
 
@@ -209,14 +154,24 @@ export const Settings: React.FC = () => {
         setImportResult(result);
 
         if (result.success) {
-            // Reload page after short delay to refresh all contexts
-            // (dataStats will be recomputed via useMemo after reload)
-            setTimeout(() => {
-                window.location.reload();
-            }, 1500);
+            setImportSuccess(true);
         }
 
         setPendingImportData(null);
+    };
+
+    const handleLoadDemoData = () => {
+        if (confirm(t('settings.dataManagement.demo.confirmLoad'))) {
+            loadDemoData();
+            window.location.reload();
+        }
+    };
+
+    const handleClearDemoData = () => {
+        if (confirm(t('settings.dataManagement.demo.confirmClear'))) {
+            clearDemoData();
+            window.location.reload();
+        }
     };
 
     return (
@@ -249,316 +204,49 @@ export const Settings: React.FC = () => {
             </motion.div>
 
             {/* Profile Form */}
-            <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
-                className="liquid-glass-card p-5 rounded-3xl space-y-6"
-            >
-                {/* Basic Info */}
-                <div>
-                    <div className="flex items-center gap-2 mb-4">
-                        <User size={18} className="text-primary" />
-                        <h2 className="text-lg font-bold text-white">{t('settings.basicInfo')}</h2>
-                    </div>
+            <ProfileSection
+                name={name}
+                setName={setName}
+                age={age}
+                setAge={setAge}
+                diagnoses={diagnoses}
+                setDiagnoses={setDiagnoses}
+                communicationStyle={communicationStyle}
+                setCommunicationStyle={setCommunicationStyle}
+                sensorySensitivities={sensorySensitivities}
+                setSensorySensitivities={setPrimarySensitivities}
+                seekingSensory={seekingSensory}
+                setSeekingSensory={setSeekingSensory}
+                effectiveStrategies={effectiveStrategies}
+                setEffectiveStrategies={setEffectiveStrategies}
+                additionalContext={additionalContext}
+                setAdditionalContext={setAdditionalContext}
+            />
 
-                    <div className="space-y-4">
-                        <div>
-                            <label className="block text-sm text-slate-400 mb-2">
-                                {t('settings.nameLabel')}
-                            </label>
-                            <input
-                                type="text"
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                                placeholder={t('settings.namePlaceholder')}
-                                className="w-full bg-white/10 rounded-xl px-4 py-3 text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-primary"
-                            />
-                        </div>
+            {/* Data Management */}
+            <DataManagementSection
+                dataStats={dataStats}
+                handleExport={handleExport}
+                fileInputRef={fileInputRef}
+                handleFileSelect={handleFileSelect}
+                showImportModal={showImportModal}
+                setShowImportModal={setShowImportModal}
+                importMode={importMode}
+                setImportMode={setImportMode}
+                importResult={importResult}
+                setImportResult={setImportResult}
+                setPendingImportData={setPendingImportData}
+                handleConfirmImport={handleConfirmImport}
+                storageUsage={storageUsage}
+                onLoadDemoData={handleLoadDemoData}
+                onClearDemoData={handleClearDemoData}
+            />
 
-                        <div>
-                            <label className="block text-sm text-slate-400 mb-2">
-                                {t('settings.ageLabel')}
-                            </label>
-                            <input
-                                type="number"
-                                value={age}
-                                onChange={(e) => setAge(e.target.value === '' ? '' : parseInt(e.target.value))}
-                                min={1}
-                                max={25}
-                                placeholder={t('settings.agePlaceholder')}
-                                className="w-32 bg-white/10 rounded-xl px-4 py-3 text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-primary"
-                            />
-                        </div>
-                    </div>
-                </div>
-
-                {/* Diagnoses */}
-                <div>
-                    <div className="flex items-center gap-2 mb-4">
-                        <Brain size={18} className="text-purple-400" />
-                        <h2 className="text-lg font-bold text-white">{t('settings.diagnoses.title')}</h2>
-                    </div>
-                    <p className="text-xs text-slate-500 mb-3">{t('settings.diagnoses.subtitle')}</p>
-                    <ChipSelect
-                        options={DIAGNOSIS_OPTIONS}
-                        selected={diagnoses}
-                        onChange={setDiagnoses}
-                    />
-                </div>
-
-                {/* Communication Style */}
-                <div>
-                    <div className="flex items-center gap-2 mb-4">
-                        <MessageSquare size={18} className="text-green-400" />
-                        <h2 className="text-lg font-bold text-white">{t('settings.communication.title')}</h2>
-                    </div>
-                    <div className="space-y-2">
-                        {COMMUNICATION_STYLES.map(style => (
-                            <button
-                                key={style.value}
-                                type="button"
-                                onClick={() => setCommunicationStyle(style.value as ChildProfile['communicationStyle'])}
-                                className={`
-                                    w-full text-left px-4 py-3 rounded-xl transition-all
-                                    ${communicationStyle === style.value
-                                        ? 'bg-primary/20 border border-primary text-white'
-                                        : 'bg-white/5 text-slate-300 hover:bg-white/10'
-                                    }
-                                `}
-                            >
-                                {style.label}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Sensory Sensitivities */}
-                <div>
-                    <div className="flex items-center gap-2 mb-4">
-                        <Zap size={18} className="text-orange-400" />
-                        <h2 className="text-lg font-bold text-white">{t('settings.sensoryChallenges.title')}</h2>
-                    </div>
-                    <p className="text-xs text-slate-500 mb-3">{t('settings.sensoryChallenges.subtitle')}</p>
-                    <ChipSelect
-                        options={SENSORY_TRIGGERS.map(t => ({ value: t, label: t }))}
-                        selected={sensorySensitivities}
-                        onChange={setPrimarySensitivities}
-                        maxSelect={5}
-                    />
-                </div>
-
-                {/* Sensory Seeking */}
-                <div>
-                    <div className="flex items-center gap-2 mb-4">
-                        <Heart size={18} className="text-pink-400" />
-                        <h2 className="text-lg font-bold text-white">{t('settings.sensorySeeking.title')}</h2>
-                    </div>
-                    <p className="text-xs text-slate-500 mb-3">{t('settings.sensorySeeking.subtitle')}</p>
-                    <ChipSelect
-                        options={SENSORY_TRIGGERS.map(t => ({ value: t, label: t }))}
-                        selected={seekingSensory}
-                        onChange={setSeekingSensory}
-                        maxSelect={5}
-                    />
-                </div>
-
-                {/* Effective Strategies */}
-                <div>
-                    <div className="flex items-center gap-2 mb-4">
-                        <Check size={18} className="text-emerald-400" />
-                        <h2 className="text-lg font-bold text-white">{t('settings.strategies.title')}</h2>
-                    </div>
-                    <p className="text-xs text-slate-500 mb-3">{t('settings.strategies.subtitle')}</p>
-                    <ChipSelect
-                        options={STRATEGIES.map(s => ({ value: s, label: s }))}
-                        selected={effectiveStrategies}
-                        onChange={setEffectiveStrategies}
-                    />
-                </div>
-
-                {/* Additional Context */}
-                <div>
-                    <label className="block text-sm text-slate-400 mb-2">
-                        {t('settings.additionalContext.label')}
-                    </label>
-                    <textarea
-                        value={additionalContext}
-                        onChange={(e) => setAdditionalContext(e.target.value)}
-                        placeholder={t('settings.additionalContext.placeholder')}
-                        rows={3}
-                        className="w-full bg-white/10 rounded-xl px-4 py-3 text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-primary resize-none"
-                    />
-                    <p className="text-xs text-slate-500 mt-1">
-                        {t('settings.additionalContext.note')}
-                    </p>
-                </div>
-            </motion.div>
-
-            {/* Data Management Section */}
-            <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className="liquid-glass-card p-5 rounded-3xl space-y-6"
-            >
-                <div className="flex items-center gap-2 mb-4">
-                    <Database size={18} className="text-blue-400" />
-                    <h2 className="text-lg font-bold text-white">{t('settings.dataManagement.title')}</h2>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Export */}
-                    <div className="bg-white/5 p-4 rounded-xl border border-white/10">
-                        <div className="flex items-center gap-3 mb-3">
-                            <Download className="text-blue-400" size={24} />
-                            <div>
-                                <h3 className="font-bold text-white">{t('settings.dataManagement.export.title')}</h3>
-                                <p className="text-xs text-slate-400">{t('settings.dataManagement.export.subtitle')}</p>
-                            </div>
-                        </div>
-                        <p className="text-xs text-slate-500 mb-4">
-                            {t('settings.dataManagement.export.desc')}
-                        </p>
-                        <button
-                            onClick={handleExport}
-                            className="w-full py-2 rounded-lg bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 font-medium text-sm transition-colors"
-                        >
-                            {t('settings.dataManagement.export.button')}
-                        </button>
-                    </div>
-
-                    {/* Import */}
-                    <div className="bg-white/5 p-4 rounded-xl border border-white/10">
-                        <div className="flex items-center gap-3 mb-3">
-                            <Upload className="text-purple-400" size={24} />
-                            <div>
-                                <h3 className="font-bold text-white">{t('settings.dataManagement.import.title')}</h3>
-                                <p className="text-xs text-slate-400">{t('settings.dataManagement.import.subtitle')}</p>
-                            </div>
-                        </div>
-                        <p className="text-xs text-slate-500 mb-4">
-                            {t('settings.dataManagement.import.desc')}
-                        </p>
-                        <button
-                            onClick={() => fileInputRef.current?.click()}
-                            className="w-full py-2 rounded-lg bg-purple-500/20 text-purple-400 hover:bg-purple-500/30 font-medium text-sm transition-colors"
-                        >
-                            {t('settings.dataManagement.import.button')}
-                        </button>
-                        <input
-                            type="file"
-                            ref={fileInputRef}
-                            onChange={handleFileSelect}
-                            accept=".json"
-                            className="hidden"
-                        />
-                    </div>
-
-                    {/* Demo Data - For Kaggle Competition */}
-                    <div className="bg-white/5 p-4 rounded-xl border border-amber-500/30 md:col-span-2">
-                        <div className="flex items-center gap-3 mb-3">
-                            <Sparkles className="text-amber-400" size={24} />
-                            <div>
-                                <h3 className="font-bold text-white">{t('settings.dataManagement.demo.title')}</h3>
-                                <p className="text-xs text-slate-400">{t('settings.dataManagement.demo.subtitle')}</p>
-                            </div>
-                        </div>
-                        <p className="text-xs text-slate-500 mb-4">
-                            {t('settings.dataManagement.demo.desc')}
-                        </p>
-                        <div className="flex gap-2">
-                            <button
-                                onClick={() => {
-                                    if (confirm(t('settings.dataManagement.demo.confirmLoad'))) {
-                                        loadDemoData();
-                                        window.location.reload();
-                                    }
-                                }}
-                                className="flex-1 py-2 rounded-lg bg-amber-500/20 text-amber-400 hover:bg-amber-500/30 font-medium text-sm transition-colors"
-                            >
-                                {t('settings.dataManagement.demo.loadButton')}
-                            </button>
-                            <button
-                                onClick={() => {
-                                    if (confirm(t('settings.dataManagement.demo.confirmClear'))) {
-                                        clearDemoData();
-                                        window.location.reload();
-                                    }
-                                }}
-                                className="py-2 px-4 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/30 font-medium text-sm transition-colors"
-                            >
-                                <Trash2 size={16} />
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                {dataStats && (
-                    <div className="flex justify-between text-xs text-slate-500 px-2">
-                        <span>{t('settings.stats.logs')}: {dataStats.logs}</span>
-                        <span>{t('settings.stats.events')}: {dataStats.crisis}</span>
-                        <span>{t('settings.stats.goals')}: {dataStats.goals}</span>
-                    </div>
-                )}
-
-                {/* Storage Quota Warning */}
-                {(() => {
-                    const usage = StorageManager.getUsageEstimate();
-                    const usedKB = Math.round(usage.usedBytes / 1024);
-                    const quotaKB = Math.round(usage.quotaBytes / 1024);
-                    return (
-                        <div className={`flex items-center gap-3 px-3 py-2 rounded-xl text-xs ${usage.usagePercent >= 80 ? 'bg-amber-500/10 border border-amber-500/20 text-amber-400' : 'text-slate-500'}`}>
-                            <Database size={14} className="flex-shrink-0" />
-                            <span>{t('settings.storage.usage', { used: usedKB, total: quotaKB, percent: usage.usagePercent })}</span>
-                            {usage.usagePercent >= 80 && (
-                                <span className="ml-auto font-bold">{t('settings.storage.warning')}</span>
-                            )}
-                        </div>
-                    );
-                })()}
-            </motion.div>
-
-            {/* Appearance Section */}
-            <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-                className="liquid-glass-card p-5 rounded-3xl space-y-4"
-            >
-                <div className="flex items-center gap-2 mb-2">
-                    <Monitor size={18} className="text-cyan-400" />
-                    <h2 className="text-lg font-bold text-white">{t('settings.appearance.title')}</h2>
-                </div>
-
-                <div className="flex items-center justify-between gap-4">
-                    <div className="flex-1">
-                        <label htmlFor="toggle-3d-bg" className="text-sm text-white font-medium cursor-pointer">
-                            {t('settings.appearance.3dBackground.label')}
-                        </label>
-                        <p className="text-xs text-slate-500 mt-1">
-                            {t('settings.appearance.3dBackground.note')}
-                        </p>
-                    </div>
-                    <button
-                        id="toggle-3d-bg"
-                        role="switch"
-                        aria-checked={show3DBackground}
-                        onClick={() => handleToggle3DBackground(!show3DBackground)}
-                        className={`
-                            relative inline-flex h-7 w-12 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out
-                            ${show3DBackground ? 'bg-primary' : 'bg-white/20'}
-                        `}
-                    >
-                        <span
-                            className={`
-                                pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out
-                                ${show3DBackground ? 'translate-x-5' : 'translate-x-0'}
-                            `}
-                        />
-                    </button>
-                </div>
-            </motion.div>
+            {/* Appearance */}
+            <PreferencesSection
+                show3DBackground={show3DBackground}
+                onToggle3DBackground={handleToggle3DBackground}
+            />
 
             {/* Save Profile Button */}
             <div className="flex gap-3">
@@ -629,80 +317,6 @@ export const Settings: React.FC = () => {
                                 className="flex-1 py-3 rounded-xl bg-red-500 text-white font-medium hover:bg-red-600 transition-colors"
                             >
                                 {t('settings.delete.modal.confirm')}
-                            </button>
-                        </div>
-                    </motion.div>
-                </motion.div>
-            )}
-
-            {/* Import Modal */}
-            {showImportModal && (
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="fixed inset-0 bg-black/70 flex items-center justify-center p-6 z-50"
-                >
-                    <motion.div
-                        initial={{ scale: 0.9, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        className="liquid-glass-card p-6 rounded-3xl max-w-md w-full"
-                    >
-                        <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                            <RefreshCw size={24} className="text-purple-400" />
-                            {t('settings.dataManagement.import.modal.title')}
-                        </h3>
-
-                        <p className="text-slate-300 mb-6">
-                            {t('settings.dataManagement.import.modal.desc')}
-                        </p>
-
-                        <div className="space-y-3 mb-6">
-                            <button
-                                onClick={() => setImportMode('replace')}
-                                className={`w-full p-3 rounded-xl border text-left transition-all ${importMode === 'replace'
-                                    ? 'bg-red-500/20 border-red-500 text-white'
-                                    : 'bg-white/5 border-white/10 text-slate-400 hover:bg-white/10'
-                                    }`}
-                            >
-                                <div className="font-bold text-sm">{t('settings.dataManagement.import.modal.replace.title')}</div>
-                                <div className="text-xs opacity-70">{t('settings.dataManagement.import.modal.replace.desc')}</div>
-                            </button>
-
-                            <button
-                                onClick={() => setImportMode('merge')}
-                                className={`w-full p-3 rounded-xl border text-left transition-all ${importMode === 'merge'
-                                    ? 'bg-blue-500/20 border-blue-500 text-white'
-                                    : 'bg-white/5 border-white/10 text-slate-400 hover:bg-white/10'
-                                    }`}
-                            >
-                                <div className="font-bold text-sm">{t('settings.dataManagement.import.modal.merge.title')}</div>
-                                <div className="text-xs opacity-70">{t('settings.dataManagement.import.modal.merge.desc')}</div>
-                            </button>
-                        </div>
-
-                        {importResult?.error && (
-                            <div className="mb-4 p-3 rounded-xl bg-red-500/20 text-red-300 text-sm flex items-center gap-2">
-                                <AlertTriangle size={16} />
-                                {importResult.error}
-                            </div>
-                        )}
-
-                        <div className="flex gap-3">
-                            <button
-                                onClick={() => {
-                                    setShowImportModal(false);
-                                    setPendingImportData(null);
-                                    setImportResult(null);
-                                }}
-                                className="flex-1 py-3 rounded-xl bg-white/10 text-white font-medium hover:bg-white/20 transition-colors"
-                            >
-                                {t('settings.dataManagement.import.modal.cancel')}
-                            </button>
-                            <button
-                                onClick={handleConfirmImport}
-                                className="flex-1 py-3 rounded-xl bg-purple-500 text-white font-medium hover:bg-purple-600 transition-colors"
-                            >
-                                {t('settings.dataManagement.import.modal.confirm')}
                             </button>
                         </div>
                     </motion.div>

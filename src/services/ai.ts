@@ -1,4 +1,6 @@
-import type { LogEntry, AnalysisResult, CrisisEvent, AnalysisCorrelation, ChildProfile } from '../types';
+/* eslint-disable no-console -- All console calls in this file are DEV-guarded */
+import type { LogEntry, AnalysisResult, CrisisEvent, ChildProfile } from '../types';
+import { calculateTotalDays } from '../utils/dateCalc';
 import {
     analyzeLogsWithGemini,
     analyzeLogsDeepWithGemini,
@@ -16,6 +18,7 @@ import {
     buildSystemPrompt,
     buildUserPrompt,
 } from './shared';
+import { parseAnalysisResponse } from './shared/parsing';
 
 // =============================================================================
 // CONFIGURATION
@@ -128,38 +131,6 @@ const callWithRetry = async (
 };
 
 // =============================================================================
-// RESPONSE PARSING
-// =============================================================================
-
-const parseAnalysisResponse = (content: string): AnalysisResult => {
-    try {
-        const parsed = JSON.parse(content);
-        return {
-            id: crypto.randomUUID(),
-            generatedAt: new Date().toISOString(),
-            triggerAnalysis: parsed.triggerAnalysis || 'Analyse ikke tilgjengelig',
-            strategyEvaluation: parsed.strategyEvaluation || 'Evaluering ikke tilgjengelig',
-            interoceptionPatterns: parsed.interoceptionPatterns || 'Mønstre ikke identifisert',
-            summary: parsed.summary || 'Oppsummering ikke tilgjengelig',
-            correlations: Array.isArray(parsed.correlations)
-                ? parsed.correlations.map((c: Partial<AnalysisCorrelation>) => ({
-                    factor1: c.factor1 || '', factor2: c.factor2 || '',
-                    relationship: c.relationship || '',
-                    strength: (['weak', 'moderate', 'strong'].includes(c.strength || '') ? c.strength : 'moderate') as 'weak' | 'moderate' | 'strong',
-                    description: c.description || ''
-                }))
-                : undefined,
-            recommendations: Array.isArray(parsed.recommendations)
-                ? parsed.recommendations.filter((r: unknown) => typeof r === 'string')
-                : undefined
-        };
-    } catch (parseError) {
-        if (import.meta.env.DEV) console.error('Failed to parse analysis response:', parseError);
-        throw new Error('Invalid response format from AI service');
-    }
-};
-
-// =============================================================================
 // MOCK DATA
 // =============================================================================
 
@@ -222,8 +193,7 @@ export const analyzeLogs = async (
     }
 
     const referenceDate = new Date(logs[logs.length - 1]?.timestamp || new Date());
-    const oldestLog = new Date(logs[0]?.timestamp || new Date());
-    const totalDays = Math.ceil((referenceDate.getTime() - oldestLog.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+    const totalDays = calculateTotalDays(logs);
     const preparedLogs = prepareLogsForAnalysis(logs, referenceDate);
     const preparedCrisis = prepareCrisisEventsForAnalysis(crisisEvents, referenceDate);
     const systemPrompt = buildSystemPrompt(options.childProfile);
@@ -274,8 +244,7 @@ export const analyzeLogsDeep = async (
     }
 
     const referenceDate = new Date(logs[logs.length - 1]?.timestamp || new Date());
-    const oldestLog = new Date(logs[0]?.timestamp || new Date());
-    const totalDays = Math.ceil((referenceDate.getTime() - oldestLog.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+    const totalDays = calculateTotalDays(logs);
     const preparedLogs = prepareLogsForAnalysis(logs, referenceDate);
     const preparedCrisis = prepareCrisisEventsForAnalysis(crisisEvents, referenceDate);
     const systemPrompt = buildSystemPrompt(options.childProfile) + '\n\nVIKTIG: Dette er en DYP ANALYSE. Bruk mer tid på å tenke gjennom sammenhenger.\n- Identifiser subtile mønstre som ikke er åpenbare\n- Gi svært spesifikke og handlingsorienterte anbefalinger\n- Analyser interaksjoner mellom ulike faktorer\n- Vurder langsiktige trender og deres implikasjoner';

@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { useLogs, useCrisis } from '../store';
 import { ArrowLeft, Info, AlertTriangle, TrendingUp } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { getArousalColor } from '../utils/formatting';
 
 // Time blocks for the heatmap (Norwegian labels)
 const TIME_BLOCKS = [
@@ -32,19 +33,6 @@ interface HeatmapCell {
     crisisCount: number;
     maxArousal: number;
 }
-
-// Get color based on arousal level
-const getArousalColor = (arousal: number, logCount: number): string => {
-    if (logCount === 0) return 'bg-slate-800/30';
-
-    if (arousal <= 3) return 'bg-emerald-500/70';
-    if (arousal <= 4) return 'bg-emerald-400/70';
-    if (arousal <= 5) return 'bg-yellow-400/70';
-    if (arousal <= 6) return 'bg-orange-400/70';
-    if (arousal <= 7) return 'bg-orange-500/70';
-    if (arousal <= 8) return 'bg-red-400/70';
-    return 'bg-red-600/80';
-};
 
 // Get emoji based on arousal
 const getArousalEmoji = (arousal: number, logCount: number): string => {

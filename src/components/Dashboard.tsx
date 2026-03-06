@@ -152,7 +152,7 @@ export const Dashboard: React.FC = () => {
     }, [logs, crisisEvents, analysis]);
 
     return (
-        <div className="flex flex-col gap-6 pb-24">
+        <main className="flex flex-col gap-6 pb-24">
             {/* Header */}
             <motion.div
                 initial={{ opacity: 0, y: -10 }}
@@ -425,6 +425,6 @@ export const Dashboard: React.FC = () => {
                     <Plus size={24} />
                 </Link>
             </motion.div>
-        </div>
+        </main>
     );
 };

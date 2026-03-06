@@ -21,11 +21,12 @@ export const TriggerSelector: React.FC<TriggerSelectorProps> = ({ options, selec
     return (
         <div className="flex flex-col gap-3">
             <h3 className="text-slate-900 dark:text-white text-base font-medium leading-normal">{label}</h3>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2" role="group" aria-label={label}>
                 {options.map(option => (
                     <button
                         key={option}
                         type="button"
+                        aria-pressed={selected.includes(option)}
                         onClick={() => toggleOption(option)}
                         className={twMerge(
                             clsx(
