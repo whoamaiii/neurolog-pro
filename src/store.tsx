@@ -15,20 +15,7 @@ import type {
     ChildProfile
 } from './types';
 import { enrichLogEntry, enrichCrisisEvent } from './types';
-
-// ============================================
-// STORAGE KEYS
-// ============================================
-const STORAGE_KEYS = {
-    LOGS: 'kreativium_logs',
-    CRISIS_EVENTS: 'kreativium_crisis_events',
-    SCHEDULE_ENTRIES: 'kreativium_schedule_entries',
-    SCHEDULE_TEMPLATES: 'kreativium_schedule_templates',
-    GOALS: 'kreativium_goals',
-    CURRENT_CONTEXT: 'kreativium_current_context',
-    CHILD_PROFILE: 'kreativium_child_profile',
-    ONBOARDING_COMPLETED: 'kreativium_onboarding_completed'
-} as const;
+import { STORAGE_KEYS } from './constants/storageKeys';
 
 // ============================================
 // LOGS CONTEXT
@@ -564,12 +551,6 @@ export const useSettings = () => {
     }
     return context;
 };
-
-// ============================================
-// BACKWARDS COMPATIBILITY
-// ============================================
-// Keep LogsProvider for backwards compatibility
-export const LogsProvider = DataProvider;
 
 // ============================================
 // DATA EXPORT FOR LLM ANALYSIS
